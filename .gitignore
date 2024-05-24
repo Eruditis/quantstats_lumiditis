@@ -17,3 +17,6 @@ Icon
 QuantStats_Lumi.egg-info/*
 test_tearsheet.html
 test_tearsheet_parameters.html
+poetry.lock
+pyproject.toml
+/.venv
