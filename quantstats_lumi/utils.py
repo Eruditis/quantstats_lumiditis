@@ -73,6 +73,9 @@ def to_returns(prices, rf=0.0):
 def to_prices(returns, base=1e5):
     """Converts returns series to price data"""
     returns = returns.copy().fillna(0).replace([_np.inf, -_np.inf], float("NaN"))
+    
+    if not _np.issubdtype(returns.dtype, _np.number):
+        returns = returns.astype(float)
 
     return base + base * _stats.compsum(returns)
 
