@@ -582,7 +582,7 @@ def gain_to_pain_ratio(returns, rf=0, resolution="D"):
     return returns.sum() / downside
 
 
-def cagr(returns, rf=0.0, compounded=True, periods=365*24*60):
+def cagr(returns, rf=0.0, compounded=True, periods_per_year=365*24*60):
     """
     Calculates the communicative annualized growth return
     (CAGR%) of access returns
@@ -596,7 +596,7 @@ def cagr(returns, rf=0.0, compounded=True, periods=365*24*60):
     else:
         total = _np.sum(total, axis=0)
 
-    years = (returns.index[-1] - returns.index[0]).days / periods
+    years = len(returns) / periods_per_year
 
     res = abs(total + 1.0) ** (1.0 / years) - 1
 
@@ -607,7 +607,7 @@ def cagr(returns, rf=0.0, compounded=True, periods=365*24*60):
     return res
 
 
-def rar(returns, rf=0.0, periods=365*24*60):
+def rar(returns, rf=0.0, periods_per_year=365*24*60):
     """
     Calculates the risk-adjusted return of access returns
     (CAGR / exposure. takes time into account.)
@@ -616,7 +616,7 @@ def rar(returns, rf=0.0, periods=365*24*60):
     In this case, rf is assumed to be expressed in yearly (annualized) terms
     """
     returns = _utils._prepare_returns(returns, rf)
-    return cagr(returns=returns, periods=periods) / exposure(returns)
+    return cagr(returns=returns, periods_per_year=periods_per_year) / exposure(returns)
 
 
 def skew(returns, prepare_returns=True):
@@ -639,11 +639,11 @@ def kurtosis(returns, prepare_returns=True):
     return returns.kurtosis()
 
 
-def calmar(returns, prepare_returns=True, periods=365*24*60):
+def calmar(returns, prepare_returns=True, periods_per_year=365*24*60):
     """Calculates the calmar ratio (CAGR% / MaxDD%)"""
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
-    cagr_ratio = cagr(returns=returns, periods=periods)
+    cagr_ratio = cagr(returns=returns, periods_per_year=periods_per_year)
     max_dd = max_drawdown(returns)
     return cagr_ratio / abs(max_dd)
 
@@ -1176,7 +1176,7 @@ def monthly_returns(returns, eoy=True, compounded=True, prepare_returns=True):
 
 
 # Calculate the romad (return/cagr over max drawdown) of a strategy
-def romad(returns, periods=365*24*60, annualize=True, smart=False):
+def romad(returns, periods_per_year=365*24*60, annualize=True, smart=False):
     """
     Calculates the romad (return/cagr over max drawdown) of a strategy
     Args:
@@ -1185,4 +1185,4 @@ def romad(returns, periods=365*24*60, annualize=True, smart=False):
         * annualize: return annualize sharpe?
         * smart: return smart sharpe ratio
     """
-    return cagr(returns, periods=periods) / -max_drawdown(returns)
+    return cagr(returns, periods_per_year=periods_per_year) / -max_drawdown(returns)
