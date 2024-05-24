@@ -266,12 +266,17 @@ def _prepare_benchmark(benchmark=None, period="max", rf=0.0, prepare_returns=Tru
         benchmark = (
             benchmark_prices.reindex(new_index, method="bfill")
             .reindex(period)
-            .pct_change()
+            .pct_change(fill_method=None)
             .fillna(0)
         )
         benchmark = benchmark[benchmark.index.isin(period)]
 
     benchmark.index = benchmark.index.tz_localize(None)
+
+    try:
+        benchmark = benchmark.astype(float)
+    except ValueError:
+        raise ValueError(f"Could not convert benchmark data to float: {benchmark}")
 
     if prepare_returns:
         return _prepare_returns(benchmark.dropna(), rf=rf)
