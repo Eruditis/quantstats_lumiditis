@@ -1009,7 +1009,11 @@ def greeks(returns, benchmark, periods=365.0, prepare_returns=True):
 
     # find covariance
     matrix = _np.cov(returns, benchmark)
-    beta = matrix[0, 1] / matrix[1, 1]
+
+    if matrix[1, 1] != 0:
+        beta = matrix[0, 1] / matrix[1, 1]
+    else:
+        beta = 0
 
     # calculates measures now
     alpha = returns.mean() - beta * benchmark.mean()
