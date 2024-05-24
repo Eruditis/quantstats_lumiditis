@@ -233,7 +233,7 @@ def avg_loss(returns, aggregate=None, compounded=True, prepare_returns=True):
     return returns[returns < 0].dropna().mean()
 
 
-def volatility(returns, periods=365, annualize=True, prepare_returns=True):
+def volatility(returns, periods=365*24*60, annualize=True, prepare_returns=True):
     """Calculates the volatility of returns for a period"""
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
@@ -284,7 +284,7 @@ def autocorr_penalty(returns, prepare_returns=False):
 # ======= METRICS =======
 
 
-def sharpe(returns, rf=0.0, periods=365, annualize=True, smart=False):
+def sharpe(returns, rf=0.0, periods=365*24*60, annualize=True, smart=False):
     """
     Calculates the sharpe ratio of access returns
 
@@ -354,7 +354,7 @@ def rolling_sharpe(
     return res
 
 
-def sortino(returns, rf=0, periods=365, annualize=True, smart=False):
+def sortino(returns, rf=0, periods=365*24*60, annualize=True, smart=False):
     """
     Calculates the sortino ratio of access returns
 
@@ -424,7 +424,7 @@ def rolling_sortino(
     return res
 
 
-def adjusted_sortino(returns, rf=0, periods=365, annualize=True, smart=False):
+def adjusted_sortino(returns, rf=0, periods=365*24*60, annualize=True, smart=False):
     """
     Jack Schwager's version of the Sortino ratio allows for
     direct comparisons to the Sharpe. See here for more info:
@@ -435,7 +435,7 @@ def adjusted_sortino(returns, rf=0, periods=365, annualize=True, smart=False):
 
 
 def probabilistic_ratio(
-    series, rf=0.0, base="sharpe", periods=365, annualize=False, smart=False
+    series, rf=0.0, base="sharpe", periods=365*24*60, annualize=False, smart=False
 ):
     """Calculates the probabilistic sharpe ratio
     Args:
@@ -526,7 +526,7 @@ def probabilistic_adjusted_sortino_ratio(
     )
 
 
-def treynor_ratio(returns, benchmark, periods=365.0, rf=0.0):
+def treynor_ratio(returns, benchmark, periods=365*24*60, rf=0.0):
     """
     Calculates the Treynor ratio
 
@@ -582,7 +582,7 @@ def gain_to_pain_ratio(returns, rf=0, resolution="D"):
     return returns.sum() / downside
 
 
-def cagr(returns, rf=0.0, compounded=True, periods=365):
+def cagr(returns, rf=0.0, compounded=True, periods=365*24*60):
     """
     Calculates the communicative annualized growth return
     (CAGR%) of access returns
@@ -607,7 +607,7 @@ def cagr(returns, rf=0.0, compounded=True, periods=365):
     return res
 
 
-def rar(returns, rf=0.0, periods=365):
+def rar(returns, rf=0.0, periods=365*24*60):
     """
     Calculates the risk-adjusted return of access returns
     (CAGR / exposure. takes time into account.)
@@ -639,7 +639,7 @@ def kurtosis(returns, prepare_returns=True):
     return returns.kurtosis()
 
 
-def calmar(returns, prepare_returns=True, periods=365):
+def calmar(returns, prepare_returns=True, periods=365*24*60):
     """Calculates the calmar ratio (CAGR% / MaxDD%)"""
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
@@ -1176,7 +1176,7 @@ def monthly_returns(returns, eoy=True, compounded=True, prepare_returns=True):
 
 
 # Calculate the romad (return/cagr over max drawdown) of a strategy
-def romad(returns, periods=365, annualize=True, smart=False):
+def romad(returns, periods=365*24*60, annualize=True, smart=False):
     """
     Calculates the romad (return/cagr over max drawdown) of a strategy
     Args:
