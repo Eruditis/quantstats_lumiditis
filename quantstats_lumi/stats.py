@@ -1182,3 +1182,197 @@ def romad(returns, periods=365, annualize=True, smart=False):
         * smart: return smart sharpe ratio
     """
     return cagr(returns, periods=periods) / -max_drawdown(returns)
+
+
+def annualized_return(returns, periods_per_year=252):
+    """
+    Calculate the annualized return of a portfolio.
+
+    Parameters
+    ----------
+    returns : pd.Series or list
+        Daily returns of the portfolio.
+    periods_per_year : int, optional
+        Number of trading periods per year, by default 252.
+
+    Returns
+    -------
+    float
+        Annualized return of the portfolio.
+
+    Raises
+    ------
+    ValueError
+        If returns are not numeric or empty.
+    """
+    if not returns:
+        raise ValueError("Returns list is empty")
+
+    if not isinstance(returns, _pd.Series):
+        returns = _pd.Series(returns)
+    
+    if not _pd.api.types.is_numeric_dtype(returns):
+        raise ValueError("Returns contain non-numeric data")
+
+    # Geometrically linked return of the portfolio
+    total_return = (1 + returns).prod() - 1
+
+    # Number of calendar days for which the portfolio has existed
+    k = len(returns)
+
+    # Average number of calendar days in a year (D_bar)
+    D_bar = periods_per_year
+
+    # Annualized return calculation according to the Confluence definition
+    annualized_return = (1 + total_return) ** (D_bar / k) - 1
+    
+    return annualized_return
+
+
+def alpha(portfolio_returns, benchmark_returns, rf=0.0):
+    """
+    Calculate Jensen's Alpha of a portfolio.
+
+    Parameters
+    ----------
+    portfolio_returns : pd.Series or list
+        Daily returns of the portfolio.
+    benchmark_returns : pd.Series or list
+        Daily returns of the benchmark.
+    rf : float, optional
+        Risk-free rate, by default 0.0.
+
+    Returns
+    -------
+    float
+        Alpha of the portfolio.
+
+    Raises
+    ------
+    ValueError
+        If returns are not numeric or empty.
+    """
+    if not portfolio_returns or not benchmark_returns:
+        raise ValueError("Returns list is empty")
+
+    if not isinstance(portfolio_returns, _pd.Series):
+        portfolio_returns = _pd.Series(portfolio_returns)
+
+    if not isinstance(benchmark_returns, _pd.Series):
+        benchmark_returns = _pd.Series(benchmark_returns)
+
+    if not _pd.api.types.is_numeric_dtype(portfolio_returns) or not _pd.api.types.is_numeric_dtype(benchmark_returns):
+        raise ValueError("Returns contain non-numeric data")
+
+    # Align the portfolio and benchmark returns
+    returns_df = _pd.DataFrame({"portfolio": portfolio_returns, "benchmark": benchmark_returns}).dropna()
+
+    # Calculate the excess returns
+    excess_portfolio = returns_df['portfolio'] - rf
+    excess_benchmark = returns_df['benchmark'] - rf
+
+    # Calculate beta using covariance/variance method
+    covariance = _np.cov(excess_portfolio, excess_benchmark)[0, 1]
+    variance = _np.var(excess_benchmark)
+    beta = covariance / variance
+
+    # Calculate expected excess returns
+    expected_excess_portfolio = excess_portfolio.mean()
+    expected_excess_benchmark = excess_benchmark.mean()
+
+    # Calculate alpha according to the Confluence definition
+    alpha = expected_excess_portfolio - beta * expected_excess_benchmark
+    
+    return alpha
+
+
+def beta(portfolio_returns, benchmark_returns):
+    """
+    Calculate the Beta of a portfolio.
+
+    Parameters
+    ----------
+    portfolio_returns : pd.Series or list
+        Daily returns of the portfolio.
+    benchmark_returns : pd.Series or list
+        Daily returns of the benchmark.
+
+    Returns
+    -------
+    float
+        Beta of the portfolio.
+
+    Raises
+    ------
+    ValueError
+        If returns are not numeric or empty.
+    """
+    if not portfolio_returns or not benchmark_returns:
+        raise ValueError("Returns list is empty")
+
+    if not isinstance(portfolio_returns, _pd.Series):
+        portfolio_returns = _pd.Series(portfolio_returns)
+
+    if not isinstance(benchmark_returns, _pd.Series):
+        benchmark_returns = _pd.Series(benchmark_returns)
+
+    if not _pd.api.types.is_numeric_dtype(portfolio_returns) or not _pd.api.types.is_numeric_dtype(benchmark_returns):
+        raise ValueError("Returns contain non-numeric data")
+
+    # Align the portfolio and benchmark returns
+    returns_df = _pd.DataFrame({"portfolio": portfolio_returns, "benchmark": benchmark_returns}).dropna()
+
+    # Calculate covariance and variance
+    covariance = returns_df['portfolio'].cov(returns_df['benchmark'])
+    variance = returns_df['benchmark'].var()
+
+    # Beta is the ratio of covariance to variance
+    beta = covariance / variance
+
+    return beta
+
+
+def max_drawdown(returns):
+    """
+    Calculate the maximum drawdown of a portfolio.
+
+    Parameters
+    ----------
+    returns : pd.Series or list
+        Daily returns of the portfolio.
+
+    Returns
+    -------
+    float
+        Maximum drawdown of the portfolio.
+    
+    Raises
+    ------
+    ValueError
+        If returns are not numeric or empty.
+    """
+    # Raise an error if the returns list is empty
+    if not returns:
+        raise ValueError("Returns list is empty")
+
+    # Convert returns to a pandas Series if it's not already
+    if not isinstance(returns, _pd.Series):
+        returns = _pd.Series(returns)
+    
+    # Raise an error if the returns contain non-numeric data
+    if not _pd.api.types.is_numeric_dtype(returns):
+        raise ValueError("Returns contain non-numeric data")
+
+    # Calculate the cumulative return series
+    cumulative = (1 + returns).cumprod()
+
+    # Identify the running maximum (peak) of the cumulative return series
+    peak = cumulative.cummax()
+
+    # Calculate the drawdown series, which is the percentage loss from the peak (trough)
+    drawdown = (cumulative - peak) / peak
+
+    # Find the maximum drawdown, which is the minimum value in the drawdown series (maximum observed loss)
+    max_drawdown = drawdown.min()
+    
+    return max_drawdown
