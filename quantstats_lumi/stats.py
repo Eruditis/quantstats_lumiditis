@@ -1330,3 +1330,49 @@ def beta(portfolio_returns, benchmark_returns):
     beta = covariance / variance
 
     return beta
+
+
+def max_drawdown(returns):
+    """
+    Calculate the maximum drawdown of a portfolio.
+
+    Parameters
+    ----------
+    returns : pd.Series or list
+        Daily returns of the portfolio.
+
+    Returns
+    -------
+    float
+        Maximum drawdown of the portfolio.
+    
+    Raises
+    ------
+    ValueError
+        If returns are not numeric or empty.
+    """
+    # Raise an error if the returns list is empty
+    if not returns:
+        raise ValueError("Returns list is empty")
+
+    # Convert returns to a pandas Series if it's not already
+    if not isinstance(returns, _pd.Series):
+        returns = _pd.Series(returns)
+    
+    # Raise an error if the returns contain non-numeric data
+    if not _pd.api.types.is_numeric_dtype(returns):
+        raise ValueError("Returns contain non-numeric data")
+
+    # Calculate the cumulative return series
+    cumulative = (1 + returns).cumprod()
+
+    # Identify the running maximum (peak) of the cumulative return series
+    peak = cumulative.cummax()
+
+    # Calculate the drawdown series, which is the percentage loss from the peak (trough)
+    drawdown = (cumulative - peak) / peak
+
+    # Find the maximum drawdown, which is the minimum value in the drawdown series (maximum observed loss)
+    max_drawdown = drawdown.min()
+    
+    return max_drawdown
